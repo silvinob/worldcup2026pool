@@ -304,22 +304,18 @@ async function init() {
     return;
   }
 
+  picksLocked = new Date() >= new Date(CONFIG.picksLockDate);
+  renderGroups();
+  hideLoader();
+
   try {
     const app = initializeApp(CONFIG.firebase);
     db = getFirestore(app);
+    await fetchQualifiers();
+    await loadLeaderboard();
   } catch(e) {
-    showToast("Firebase init failed: " + e.message, true);
-    hideLoader();
-    return;
+    showToast("Firebase error: " + e.message, true);
   }
-
-  picksLocked = new Date() >= new Date(CONFIG.picksLockDate);
-
-  renderGroups();
-  await fetchQualifiers();
-  await loadLeaderboard();
-
-  hideLoader();
 }
 
 function showConfigWarning() {
