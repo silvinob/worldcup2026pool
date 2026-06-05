@@ -298,7 +298,7 @@ let currentTab = 'picks';
 
 async function init() {
   // Check if config is filled
-  if (CONFIG.firebase.apiKey === "AIzaSyAcizdP3VnfyGDXRRlQ_FdL2ny7C28GfHY") {
+  if (CONFIG.firebase.apiKey === "YOUR_FIREBASE_API_KEY") {
     showConfigWarning();
     hideLoader();
     return;
@@ -474,7 +474,7 @@ window.loadMyPicks = async function() {
 // ── FETCH QUALIFIERS FROM API-FOOTBALL ───────────────────────────────────────
 
 async function fetchQualifiers() {
-  if (CONFIG.footballApiKey === "945f58d8a579560b103c46bd5695ec2a") return;
+  if (CONFIG.footballApiKey === "YOUR_API_FOOTBALL_KEY") return;
   // Only fetch if group stage has started
   if (new Date() < new Date(CONFIG.picksLockDate)) return;
 
