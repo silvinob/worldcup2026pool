@@ -242,7 +242,7 @@ h1 span{color:var(--gold)}
     <div class="sgrid">
       <div class="sc"><div class="lbl">Players</div><div class="val" id="stp">0</div></div>
       <div class="sc"><div class="lbl">Groups Scored</div><div class="val gold" id="stg">0/12</div></div>
-      <div class="sc"><div class="lbl">Max Pts</div><div class="val">32</div></div>
+      <div class="sc"><div class="lbl">Max Pts</div><div class="val">95</div></div>
     </div>
     <div class="lb-wrap" id="lbt"><div class="lbe">Loading...</div></div>
   </div>
@@ -282,7 +282,7 @@ const ROUND_LABELS={R32:"Round of 32",R16:"Round of 16",QF:"Quarter-Finals",SF:"
 const ROUND_LOCK={R32:"2026-06-29T12:00:00",R16:"2026-07-05T12:00:00",QF:"2026-07-10T12:00:00",SF:"2026-07-14T12:00:00",F:"2026-07-18T12:00:00"};
 const ROUND_PTS={R32:1,R16:2,QF:4,SF:8,F:16};
 
-let db,picks={},thirds=[],playoffPicks={},quals={},qualThirds=[],entries=[],locked=false,pinResolve=null;
+let db,picks={},thirds=[],playoffPicks={},quals={},qualThirds=[],knockoutResults={},entries=[],locked=false,pinResolve=null;
 let activePO={name:'',pin:''};
 
 async function init(){
@@ -292,7 +292,7 @@ async function init(){
   try{
     const app=initializeApp(CONFIG.firebase);
     db=getFirestore(app);
-    await fetchQ();await loadLB();
+    await fetchQ();await fetchKnockoutResults();await loadLB();
   }catch(e){toast("Firebase: "+e.message,1);}
 }
 
@@ -531,7 +531,7 @@ window.submitPicks=async function(){
     }
     const b=document.getElementById('sbtn');b.disabled=1;b.innerHTML='<span class="spin"></span>Saving...';
     const existing=snap.exists()?snap.data():{};
-    await setDoc(doc(db,"picks",k),{...existing,name:n,picks,thirds,pinHash,submittedAt:new Date().toISOString(),score:scoreGroup(picks,thirds)});
+    await setDoc(doc(db,"picks",k),{...existing,name:n,picks,thirds,pinHash,submittedAt:new Date().toISOString(),score:scoreFull(picks,thirds,existing.playoffPicks||{})});
     toast("Picks saved!");await loadLB();b.disabled=0;b.textContent='Submit Picks';
   }catch(e){toast("Error: "+e.message,1);}
 };
@@ -571,8 +571,11 @@ window.submitPlayoffPicks=async function(){
   try{
     const snap=await getDoc(doc(db,"picks",activePO.key));
     if(!snap.exists()){toast("Submit group picks first",1);return;}
-    await setDoc(doc(db,"picks",activePO.key),{...snap.data(),playoffPicks});
+    const data=snap.data();
+    const newScore=scoreFull(data.picks||{},data.thirds||[],playoffPicks);
+    await setDoc(doc(db,"picks",activePO.key),{...data,playoffPicks,score:newScore});
     toast("Playoff picks saved!");
+    await loadLB();
   }catch(e){toast("Error: "+e.message,1);}
 };
 
@@ -605,11 +608,69 @@ function scoreGroup(p,th){
   return s;
 }
 
+function scorePlayoffs(pp){
+  let s=0;
+  const rndNames=['R32','R16','QF','SF','F'];
+  const pts={R32:1,R16:2,QF:4,SF:8,F:16};
+  rndNames.forEach(rnd=>{
+    const results=knockoutResults[rnd]||{};
+    Object.keys(results).forEach(mi=>{
+      const winner=results[mi];
+      if(winner&&pp&&pp[rnd+'_'+mi]===winner) s+=pts[rnd];
+    });
+  });
+  return s;
+}
+
+function scoreFull(p,th,pp){
+  return scoreGroup(p,th)+scorePlayoffs(pp||{});
+}
+
+async function fetchKnockoutResults(){
+  if(CONFIG.footballApiKey==="YOUR_API_FOOTBALL_KEY")return;
+  if(new Date()<new Date(ROUND_LOCK.R32))return;
+  try{
+    const r=await fetch("https://v3.football.api-sports.io/fixtures?league="+CONFIG.leagueId+"&season="+CONFIG.season+"&round=Round+of+32",{headers:{"x-apisports-key":CONFIG.footballApiKey}});
+    const d=await r.json();
+    const fixtures=d?.response||[];
+    const rndMap={"Round of 32":"R32","Round of 16":"R16","Quarter-finals":"QF","Semi-finals":"SF","Final":"F"};
+    // Build match index: same order as R32 bracket
+    const rndNames=["R32","R16","QF","SF","F"];
+    // Fetch all rounds
+    const allRounds=["Round+of+32","Round+of+16","Quarter-finals","Semi-finals","Final"];
+    for(let ri=0;ri<allRounds.length;ri++){
+      const rnd=rndNames[ri];
+      if(new Date()<new Date(ROUND_LOCK[rnd]))continue;
+      const rr=await fetch("https://v3.football.api-sports.io/fixtures?league="+CONFIG.leagueId+"&season="+CONFIG.season+"&round="+allRounds[ri],{headers:{"x-apisports-key":CONFIG.footballApiKey}});
+      const rd=await rr.json();
+      const matches=rd?.response||[];
+      if(!knockoutResults[rnd])knockoutResults[rnd]={};
+      matches.forEach((m,mi)=>{
+        const status=m.fixture?.status?.short;
+        if(status==='FT'||status==='AET'||status==='PEN'){
+          const homeGoals=m.score?.fulltime?.home??0;
+          const awayGoals=m.score?.fulltime?.away??0;
+          const homePen=m.score?.penalty?.home??0;
+          const awayPen=m.score?.penalty?.away??0;
+          const homeTotal=homeGoals+(homePen||0);
+          const awayTotal=awayGoals+(awayPen||0);
+          const homeTeam=NM[m.teams?.home?.name]||m.teams?.home?.name;
+          const awayTeam=NM[m.teams?.away?.name]||m.teams?.away?.name;
+          if(homeTeam||awayTeam){
+            knockoutResults[rnd][mi]=homeTotal>=awayTotal?homeTeam:awayTeam;
+          }
+        }
+      });
+    }
+    await rescoreAll();
+  }catch(e){console.warn("Knockout fetch failed:",e);}
+}
+
 async function rescoreAll(){
   if(!db)return;
   const s=await getDocs(collection(db,"picks"));
   await Promise.all([...s.docs].map(d=>{
-    const nd=scoreGroup(d.data().picks||{},d.data().thirds||[]);
+    const nd=scoreFull(d.data().picks||{},d.data().thirds||[],d.data().playoffPicks||{});
     if(nd!==d.data().score)return setDoc(doc(db,"picks",d.id),{...d.data(),score:nd});
     return null;
   }).filter(Boolean));
