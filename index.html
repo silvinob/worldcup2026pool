@@ -6,7 +6,6 @@
 <title>World Cup 2026 · SNES Picks Pool</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
-// v1.6 — 2026-06-10 — Picks comparison tab
 const CONFIG={
   firebase:{apiKey:"AIzaSyAcizdP3VnfyGDXRRlQ_FdL2ny7C28GfHY",authDomain:"world-cup-2026-picks-pool.firebaseapp.com",projectId:"world-cup-2026-picks-pool",storageBucket:"world-cup-2026-picks-pool.firebasestorage.app",messagingSenderId:"21608651602",appId:"1:21608651602:web:09d8d7bc9aab971907f88b"},
   footballApiKey:"945f58d8a579560b103c46bd5695ec2a",
@@ -167,41 +166,8 @@ h1 span{color:var(--gold)}
 .modal-box input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:9px;color:var(--text);font-family:var(--fm);font-size:16px;letter-spacing:4px;text-align:center;outline:none;margin-bottom:10px;transition:border .2s}
 .modal-box input:focus{border-color:var(--green)}
 .modal-actions{display:flex;gap:8px}
-@media print{
-  .tabs,.sbar,.btn-print,.nblock,.toast,.modal,.ov,#v-leaderboard,#v-results{display:none!important}
-  #v-picks,#v-playoffs{display:block!important}
-  .app{padding:0}
-  .header{padding:6px 0;border-bottom:2px solid #16a34a}
-  .gc{break-inside:avoid}.ggrid{gap:6px}
-  .bracket-outer{overflow:visible}
-  .bracket-scroll{display:block}
-  .b-round{page-break-inside:avoid}
-  #v-playoffs{margin-top:20px;page-break-before:always}
-  .playoff-print-title{display:block!important}
-}
-.playoff-print-title{display:none;font-family:var(--fd);font-size:22px;letter-spacing:2px;color:var(--gold);margin-bottom:10px}
+@media print{.tabs,.sbar,.btn-print,.nblock,.toast,.modal,.ov,#v-leaderboard,#v-results,#v-playoffs{display:none!important}.app{padding:0}.header{padding:6px 0;border-bottom:2px solid #16a34a}.gc{break-inside:avoid}.ggrid{gap:6px}}
 @media(max-width:600px){.lbh,.lbr{grid-template-columns:28px 1fr repeat(6,20px) 32px}.ggrid{grid-template-columns:1fr 1fr}}
-/* COMPARE */
-.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cmp-table{border-collapse:collapse;font-size:12px;min-width:600px;width:100%}
-.cmp-table th{background:var(--green);color:#fff;font-family:var(--fm);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:8px 10px;text-align:center;border:1px solid #15803d;white-space:nowrap}
-.cmp-table th.grp-hdr{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.cmp-table th.player-hdr{background:var(--green);min-width:100px}
-.cmp-table td{padding:6px 8px;border:1px solid var(--border);text-align:center;vertical-align:middle}
-.cmp-table td.grp-label{background:var(--green);color:#fff;font-family:var(--fd);font-size:16px;letter-spacing:1px;text-align:center;font-weight:normal;white-space:nowrap}
-.cmp-table td.pick-cell{min-width:90px}
-.cmp-pick{display:flex;flex-direction:column;gap:3px}
-.cmp-team{display:flex;align-items:center;gap:4px;padding:2px 4px;border-radius:3px;font-size:11px}
-.cmp-team.p1{background:var(--goldl);border-left:2px solid var(--gold)}
-.cmp-team.p2{background:var(--bluel);border-left:2px solid var(--blue)}
-.cmp-team.p3{background:var(--bronzel);border-left:2px solid var(--bronze)}
-.cmp-team img{width:16px;height:11px;object-fit:cover;border-radius:1px;flex-shrink:0}
-.cmp-team span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px}
-.cmp-badge{font-family:var(--fd);font-size:10px;color:#fff;padding:0 4px;border-radius:2px;flex-shrink:0}
-.cmp-b1{background:var(--gold)}.cmp-b2{background:var(--blue)}.cmp-b3{background:var(--bronze)}
-.cmp-third-row td{background:var(--bg3);font-size:11px;font-family:var(--fm);color:var(--muted)}
-.cmp-third-cell{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
-.cmp-third-tag{background:var(--bronzel);border:1px solid var(--bronze);color:var(--bronze);font-family:var(--fm);font-size:9px;padding:1px 5px;border-radius:3px}
 </style>
 </head>
 <body>
@@ -220,7 +186,7 @@ h1 span{color:var(--gold)}
 </div>
 <div class="app">
   <div class="header">
-    <div class="eyebrow">SNES Office Picks Pool</div>
+    <div class="eyebrow">Office Picks Pool</div>
     <h1>WORLD CUP <span>2026</span></h1>
     <div class="hsub">Pick 1st, 2nd &amp; 3rd per group · Mark 8 qualifying 3rd places · Pick playoff winners</div>
     <div class="lbadge"><span class="dot"></span> Group picks lock June 11, 2026</div>
@@ -230,7 +196,6 @@ h1 span{color:var(--gold)}
     <button class="tab" onclick="showTab('playoffs')" id="tab-playoffs">Playoffs</button>
     <button class="tab" onclick="showTab('leaderboard')" id="tab-lb">Leaderboard</button>
     <button class="tab" onclick="showTab('results')" id="tab-res">Results</button>
-    <button class="tab" onclick="showTab('compare')" id="tab-cmp">Compare</button>
   </div>
 
   <!-- MY PICKS -->
@@ -239,7 +204,7 @@ h1 span{color:var(--gold)}
       <label>Name</label><input type="text" id="pname" placeholder="First name only" maxlength="40">
       <label>PIN</label><input type="password" inputmode="numeric" maxlength="4" id="ppin" placeholder="4 digits" style="max-width:78px">
       <button class="btn btn-g" onclick="loadMyPicks()">Load</button>
-      <button class="btn btn-print" onclick="printAll()">Print</button>
+      <button class="btn btn-print" onclick="window.print()">Print</button>
       <div class="pin-note">New? Submit once to set your PIN. Returning? Enter name + PIN then Load.</div>
     </div>
     <div class="legend">
@@ -261,15 +226,13 @@ h1 span{color:var(--gold)}
 
   <!-- PLAYOFFS -->
   <div id="v-playoffs" style="display:none">
-    <div class="playoff-print-title">PLAYOFF BRACKET</div>
     <div class="nblock">
       <label>Name</label><input type="text" id="poname" placeholder="Same name as group picks" maxlength="40">
       <label>PIN</label><input type="password" inputmode="numeric" maxlength="4" id="popin" placeholder="4 digits" style="max-width:78px">
       <button class="btn btn-g" onclick="loadPlayoffView()">Load My Bracket</button>
       <button class="btn btn-p" id="po-save-btn" onclick="submitPlayoffPicks()">Save Picks</button>
     </div>
-    <div class="print-bracket-title">PLAYOFF BRACKET PICKS</div>
-    <p class="po-print-note" style="color:var(--muted);font-size:12px;margin-bottom:14px;font-family:var(--fm)">Bracket auto-fills from your group picks. Click a team to pick them to win. Points: R32=1 · R16=2 · QF=4 · SF=8 · Final=16</p>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:14px;font-family:var(--fm)">Bracket auto-fills from your group picks. Click a team to pick them to win. Points: R32=1 · R16=2 · QF=4 · SF=8 · Final=16</p>
     <div id="bracket-container"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--fm);font-size:12px">Load your picks to see your bracket.</div></div>
   </div>
 
@@ -289,12 +252,6 @@ h1 span{color:var(--gold)}
     <div class="stitle">LIVE RESULTS</div>
     <p style="color:var(--muted);font-size:12px;margin-bottom:14px;font-family:var(--fm)">Live standings from api-football.com.</p>
     <div class="ggrid" id="rgrid"></div>
-  </div>
-  <!-- COMPARE -->
-  <div id="v-compare" style="display:none">
-    <div class="stitle">PICKS COMPARISON</div>
-    <p style="color:var(--muted);font-size:12px;margin-bottom:14px;font-family:var(--fm)">All submitted picks side by side. Picks are visible before June 11 so you can compare before the tournament starts.</p>
-    <div id="compare-container"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--fm);font-size:12px">Loading picks...</div></div>
   </div>
 </div>
 
@@ -723,4 +680,68 @@ async function rescoreAll(){
 async function loadLB(){
   if(!db)return;
   try{
-  
+    const s=await getDocs(collection(db,"picks"));
+    entries=[];s.forEach(d=>entries.push(d.data()));
+    entries.sort((a,b)=>(b.score||0)-(a.score||0));
+    renderLB();
+  }catch(e){console.warn(e);}
+}
+
+function renderLB(){
+  const mn=document.getElementById('pname').value.trim().toLowerCase();
+  document.getElementById('stp').textContent=entries.length;
+  document.getElementById('stg').textContent=Object.keys(quals).length+'/12';
+  const c=document.getElementById('lbt');
+  if(!entries.length){c.innerHTML='<div class="lbe">No picks yet. Be the first!</div>';return;}
+  let h='<div class="lbh"><div>#</div><div>Player</div>'+G.map(g=>'<div>'+g.id+'</div>').join('')+'<div>PTS</div></div>';
+  entries.forEach((e,i)=>{
+    const me=e.name.toLowerCase()===mn;
+    const rc=i===0?'t1':i===1?'t2':i===2?'t3':'';
+    const ep=e.picks||{};
+    h+='<div class="lbr'+(me?' me':'')+'"><div class="lbrk '+rc+'">'+(i+1)+'</div><div class="lbnm">'+e.name+(me?' (you)':'')+'</div>'
+      +G.map(g=>{
+        const q=quals[g.id]||{};const gp=ep[g.id]||{};
+        let pt=0;
+        if(q.first&&gp.first===q.first)pt++;
+        if(q.second&&gp.second===q.second)pt++;
+        return '<div class="lbs'+(pt>0?' hit':'')+'">'+((q.first||q.second)?pt:'·')+'</div>';
+      }).join('')
+      +'<div class="lbt">'+(e.score||0)+'</div></div>';
+  });
+  c.innerHTML=h;
+}
+
+function renderR(){
+  const g=document.getElementById('rgrid');g.innerHTML='';
+  G.forEach(grp=>{
+    const q=quals[grp.id]||{};const d=document.createElement('div');d.className='gc';
+    let rows='';
+    grp.t.forEach(t=>{
+      const isFirst=q.first===t.n,isSecond=q.second===t.n;
+      let c='tr lk'+(isFirst?' sel1':isSecond?' sel2':'');
+      rows+='<div class="'+c+'"><img class="flag" src="https://flagcdn.com/w40/'+t.f+'.png" onerror="this.style.display=\'none\'"><span class="tn">'+t.n+(t.h?'<span class="hc">H</span>':'')+'</span>'
+        +(isFirst?'<span class="pbadge pb1">1</span>':isSecond?'<span class="pbadge pb2">2</span>':'')+'</div>';
+    });
+    const done=q.first&&q.second;
+    d.innerHTML='<div class="gch"><span class="gn">GROUP '+grp.id+'</span><span class="gpc'+(done?' ok':'')+'">'+( done?'Final':'In Progress')+'</span></div>'+rows;
+    g.appendChild(d);
+  });
+}
+
+window.showTab=function(t){
+  ['picks','playoffs','leaderboard','results'].forEach(v=>{
+    const vid=v==='leaderboard'?'leaderboard':v==='results'?'results':v==='playoffs'?'playoffs':'picks';
+    const tid=v==='leaderboard'?'lb':v==='results'?'res':v==='playoffs'?'playoffs':'picks';
+    document.getElementById('v-'+vid).style.display=v===t?'':'none';
+    document.getElementById('tab-'+tid).classList.toggle('active',v===t);
+  });
+  if(t==='leaderboard')renderLB();
+  if(t==='results')renderR();
+};
+
+function toast(msg,e){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(e?' err':'');setTimeout(()=>t.className='toast',3000);}
+function hide(){const o=document.getElementById('ov');o.classList.add('hidden');setTimeout(()=>o.style.display='none',500);}
+init();
+</script>
+</body>
+</html>
